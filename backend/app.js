@@ -10,6 +10,7 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://todo-list-app-six-lilac.vercel.app"
 ];
 
 app.use(cors({
