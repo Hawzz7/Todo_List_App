@@ -1,3 +1,4 @@
+// src/components/TodoForm.jsx
 import { useState } from "react";
 import api from "../api/axios";
 import toast from "react-hot-toast";
@@ -14,7 +15,6 @@ export default function TodoForm({ refresh }) {
 
     try {
       await api.post("/api/todos", form);
-
       toast.success("Todo added");
 
       setForm({
@@ -32,15 +32,11 @@ export default function TodoForm({ refresh }) {
   return (
     <form
       onSubmit={submit}
-      className="bg-white p-5 rounded-2xl shadow mb-5 space-y-3"
+      className="space-y-3"
     >
-      <h2 className="text-lg font-semibold text-gray-700">
-        Add New Todo
-      </h2>
-
       {/* Title */}
       <input
-        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
         placeholder="Enter title..."
         value={form.title}
         onChange={(e) =>
@@ -50,9 +46,9 @@ export default function TodoForm({ refresh }) {
 
       {/* Description */}
       <textarea
-        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+        rows="3"
         placeholder="Enter description..."
-        rows="2"
         value={form.description}
         onChange={(e) =>
           setForm({ ...form, description: e.target.value })
@@ -61,7 +57,7 @@ export default function TodoForm({ refresh }) {
 
       {/* Status */}
       <select
-        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full p-3 border rounded-lg"
         value={form.status}
         onChange={(e) =>
           setForm({ ...form, status: e.target.value })

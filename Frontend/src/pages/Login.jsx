@@ -1,3 +1,4 @@
+// src/pages/Login.jsx
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { setUser } from "../store/authSlice";
@@ -9,6 +10,8 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -17,7 +20,22 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 🔥 Validation
+    if (!form.email || !form.password) {
+      return toast.error("All fields are required");
+    }
+
+    if (!form.email.includes("@")) {
+      return toast.error("Enter a valid email");
+    }
+
+    if (form.password.length < 6) {
+      return toast.error("Password must be at least 6 characters");
+    }
+
     try {
+      setLoading(true);
+
       const res = await api.post("/api/auth/login", form);
 
       dispatch(setUser(res.data.user));
@@ -25,57 +43,65 @@ export default function Login() {
 
       navigate("/dashboard");
     } catch (error) {
-      toast.error("Login failed");
+      const msg =
+        error.response?.data?.message || "Login failed";
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
-      
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-2xl shadow-lg w-96"
-      >
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Login
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-blue-200 to-blue-300 px-3">
+
+      <div className="w-full max-w-md backdrop-blur-md bg-white/80 p-6 sm:p-8 rounded-2xl shadow-xl">
+
+        <h2 className="text-2xl font-bold text-center text-blue-700 mb-6">
+          Welcome Back 👋
         </h2>
 
-        {/* Email */}
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
-        />
+        <form onSubmit={handleSubmit} className="space-y-4">
 
-        {/* Password */}
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-          onChange={(e) =>
-            setForm({ ...form, password: e.target.value })
-          }
-        />
+          {/* Email */}
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            onChange={(e) =>
+              setForm({ ...form, email: e.target.value })
+            }
+          />
 
-        {/* Button */}
-        <button className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-200">
-          Login
-        </button>
+          {/* Password */}
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            onChange={(e) =>
+              setForm({ ...form, password: e.target.value })
+            }
+          />
 
-        {/* Register link */}
-        <p className="mt-4 text-center text-sm text-gray-600">
-          No account?{" "}
-          <Link
-            to="/register"
-            className="text-blue-500 font-medium hover:underline"
+          {/* Button */}
+          <button
+            disabled={loading}
+            className={`w-full py-3 rounded-lg text-white font-medium ${
+              loading
+                ? "bg-blue-300 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700"
+            }`}
           >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+
+        <p className="text-sm text-center mt-4">
+          Don’t have an account?{" "}
+          <Link to="/register" className="text-blue-600 font-medium">
             Register
           </Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }

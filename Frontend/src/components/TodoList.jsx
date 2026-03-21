@@ -8,11 +8,10 @@ export default function TodoList({ todos, refresh }) {
   const [edit, setEdit] = useState({});
   const [deleteId, setDeleteId] = useState(null);
 
-  // ✏️ update
   const update = async (id) => {
     try {
       await api.put(`/api/todos/${id}`, edit);
-      toast.success("Todo updated");
+      toast.success("Updated");
       setEditId(null);
       refresh();
     } catch {
@@ -20,14 +19,13 @@ export default function TodoList({ todos, refresh }) {
     }
   };
 
-  // 🔄 toggle status
   const toggle = async (t) => {
     const next =
       t.status === "pending"
         ? "in-progress"
         : t.status === "in-progress"
-        ? "completed"
-        : "pending";
+          ? "completed"
+          : "pending";
 
     try {
       await api.put(`/api/todos/${t._id}`, { status: next });
@@ -37,7 +35,6 @@ export default function TodoList({ todos, refresh }) {
     }
   };
 
-  // 🗑 delete
   const confirmDelete = async () => {
     try {
       await api.delete(`/api/todos/${deleteId}`);
@@ -49,8 +46,7 @@ export default function TodoList({ todos, refresh }) {
     }
   };
 
-  // 🎨 Status color helper
-  const getStatusColor = (status) => {
+  const statusColor = (status) => {
     if (status === "completed") return "text-green-500";
     if (status === "in-progress") return "text-yellow-500";
     return "text-red-500";
@@ -62,21 +58,19 @@ export default function TodoList({ todos, refresh }) {
         {todos.map((t) => (
           <div
             key={t._id}
-            className="bg-white p-4 rounded-xl shadow hover:shadow-md transition"
+            className="bg-white p-4 rounded-xl shadow flex flex-col gap-2"
           >
             {editId === t._id ? (
               <>
-                {/* ✏️ Edit Mode */}
+                {/* Edit Mode */}
                 <input
-                  className="w-full border p-2 mb-2 rounded"
+                  className="w-full border p-2 rounded"
                   value={edit.title}
-                  onChange={(e) =>
-                    setEdit({ ...edit, title: e.target.value })
-                  }
+                  onChange={(e) => setEdit({ ...edit, title: e.target.value })}
                 />
 
-                <input
-                  className="w-full border p-2 mb-2 rounded"
+                <textarea
+                  className="w-full border p-2 rounded"
                   value={edit.description}
                   onChange={(e) =>
                     setEdit({
@@ -86,17 +80,17 @@ export default function TodoList({ todos, refresh }) {
                   }
                 />
 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={() => update(t._id)}
-                    className="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600"
+                    className="bg-green-500 text-white px-4 py-2 rounded"
                   >
                     Save
                   </button>
 
                   <button
                     onClick={() => setEditId(null)}
-                    className="px-4 py-1 border rounded"
+                    className="border px-4 py-2 rounded"
                   >
                     Cancel
                   </button>
@@ -104,40 +98,39 @@ export default function TodoList({ todos, refresh }) {
               </>
             ) : (
               <>
-                {/* 📄 View Mode */}
-                <h3 className="text-lg font-semibold">
+                {/* View Mode */}
+                <h3 className="text-base sm:text-lg font-semibold break-words">
                   {t.title}
                 </h3>
 
-                <p className="text-gray-600 text-sm">
+                <p className="text-sm text-gray-600 break-words">
                   {t.description}
                 </p>
 
-                {/* 🔄 Status */}
                 <p
                   onClick={() => toggle(t)}
-                  className={`text-sm mt-1 cursor-pointer font-medium ${getStatusColor(
-                    t.status
+                  className={`text-sm font-medium cursor-pointer ${statusColor(
+                    t.status,
                   )}`}
                 >
                   {t.status}
                 </p>
 
                 {/* Actions */}
-                <div className="flex gap-4 mt-3">
+                <div className="flex flex-wrap gap-3 mt-2">
                   <button
                     onClick={() => {
                       setEditId(t._id);
                       setEdit(t);
                     }}
-                    className="text-blue-500 hover:underline"
+                    className="text-blue-500 text-sm"
                   >
                     Edit
                   </button>
 
                   <button
                     onClick={() => setDeleteId(t._id)}
-                    className="text-red-500 hover:underline"
+                    className="text-red-500 text-sm"
                   >
                     Delete
                   </button>
@@ -148,7 +141,7 @@ export default function TodoList({ todos, refresh }) {
         ))}
       </div>
 
-      {/* 🗑 Delete Modal */}
+      {/* Delete Modal */}
       {deleteId && (
         <DeleteModal
           onConfirm={confirmDelete}

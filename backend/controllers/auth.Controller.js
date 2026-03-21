@@ -14,7 +14,28 @@ export const register = async (req, res) => {
     if (!name || !email || !password) {
       return res
         .status(400)
-        .json({ success: false, message: "Missing Details" });
+        .json({ success: false, message: "All fields are required" });
+    }
+
+    if (name.length < 3) {
+      return res.status(400).json({
+        success: false,
+        message: "Name must be at least 3 characters",
+      });
+    }
+
+    if (!email.includes("@")) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email format",
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters",
+      });
     }
 
     const existingUser = await User.findOne({ email });
@@ -86,14 +107,14 @@ export const login = async (req, res) => {
     if (!user) {
       return res
         .status(400)
-        .json({ success: false, message: "Invalid email or password" });
+        .json({ success: false, message: "Invalid credentials" });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res
         .status(400)
-        .json({ success: false, message: "Invalid password" });
+        .json({ success: false, message: "Invalid credentials" });
     }
 
     const accessToken = generateAccessToken(user._id);
@@ -121,7 +142,7 @@ export const login = async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       })
       .status(200)
-      .json({ success: true, message: "User logged in successfully", user: { id: user._id, name: user.name, email: user.email } });
+      .json({ success: true, message: "Login Successful", user: { id: user._id, name: user.name, email: user.email } });
   } catch (error) {
     res.status(500).json({
       success: false,

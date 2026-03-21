@@ -10,6 +10,8 @@ export default function Register() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [loading, setLoading] = useState(false);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -19,7 +21,26 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 🔥 Validation
+    if (!form.name || !form.email || !form.password) {
+      return toast.error("All fields are required");
+    }
+
+    if (form.name.length < 3) {
+      return toast.error("Name must be at least 3 characters");
+    }
+
+    if (!form.email.includes("@")) {
+      return toast.error("Enter a valid email");
+    }
+
+    if (form.password.length < 6) {
+      return toast.error("Password must be at least 6 characters");
+    }
+
     try {
+      setLoading(true);
+
       const res = await api.post("/api/auth/register", form);
 
       dispatch(setUser(res.data.user));
@@ -27,67 +48,76 @@ export default function Register() {
 
       navigate("/dashboard");
     } catch (error) {
-      toast.error("Registration failed");
+      const msg =
+        error.response?.data?.message ||
+        "Registration failed";
+
+      toast.error(msg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500">
-      
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-2xl shadow-lg w-96"
-      >
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Create Account 
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 via-blue-200 to-indigo-300 px-3">
+
+      <div className="w-full max-w-md backdrop-blur-md bg-white/80 p-6 sm:p-8 rounded-2xl shadow-xl">
+
+        <h2 className="text-2xl font-bold text-center text-indigo-700 mb-6">
+          Create Account
         </h2>
 
-        {/* Name */}
-        <input
-          type="text"
-          placeholder="Full Name"
-          className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
-          onChange={(e) =>
-            setForm({ ...form, name: e.target.value })
-          }
-        />
+        <form onSubmit={handleSubmit} className="space-y-4">
 
-        {/* Email */}
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
-          onChange={(e) =>
-            setForm({ ...form, email: e.target.value })
-          }
-        />
+          {/* Name */}
+          <input
+            placeholder="Name"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+            onChange={(e) =>
+              setForm({ ...form, name: e.target.value })
+            }
+          />
 
-        {/* Password */}
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-3 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
-          onChange={(e) =>
-            setForm({ ...form, password: e.target.value })
-          }
-        />
+          {/* Email */}
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+            onChange={(e) =>
+              setForm({ ...form, email: e.target.value })
+            }
+          />
 
-        {/* Button */}
-        <button className="w-full bg-purple-500 text-white py-3 rounded-lg hover:bg-purple-600 transition duration-200">
-          Register
-        </button>
+          {/* Password */}
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+            onChange={(e) =>
+              setForm({ ...form, password: e.target.value })
+            }
+          />
 
-        {/* Login link */}
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Already have an account?{" "}
-          <Link
-            to="/"
-            className="text-purple-500 font-medium hover:underline"
+          {/* Button */}
+          <button
+            disabled={loading}
+            className={`w-full py-3 rounded-lg text-white font-medium ${
+              loading
+                ? "bg-indigo-300 cursor-not-allowed"
+                : "bg-indigo-600 hover:bg-indigo-700"
+            }`}
           >
+            {loading ? "Registering..." : "Register"}
+          </button>
+        </form>
+
+        <p className="text-sm text-center mt-4">
+          Already have an account?{" "}
+          <Link to="/" className="text-indigo-600 font-medium">
             Login
           </Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }
