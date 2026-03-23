@@ -1,9 +1,13 @@
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import api from "../api/axios";
 import DeleteModal from "./DeleteModal";
 import toast from "react-hot-toast";
 
 export default function TodoList({ todos, refresh }) {
+  const mode = useSelector((s) => s.theme.mode);
+  const isDark = mode === "dark";
+
   const [editId, setEditId] = useState(null);
   const [edit, setEdit] = useState({});
   const [deleteId, setDeleteId] = useState(null);
@@ -24,8 +28,8 @@ export default function TodoList({ todos, refresh }) {
       t.status === "pending"
         ? "in-progress"
         : t.status === "in-progress"
-          ? "completed"
-          : "pending";
+        ? "completed"
+        : "pending";
 
     try {
       await api.put(`/api/todos/${t._id}`, { status: next });
@@ -46,10 +50,13 @@ export default function TodoList({ todos, refresh }) {
     }
   };
 
-  const statusColor = (status) => {
-    if (status === "completed") return "text-green-500";
-    if (status === "in-progress") return "text-yellow-500";
-    return "text-red-500";
+  // Badge styles 
+  const statusBadge = (status) => {
+    if (status === "completed")
+      return "bg-green-100 text-green-600";
+    if (status === "in-progress")
+      return "bg-yellow-100 text-yellow-600";
+    return "bg-red-100 text-red-600";
   };
 
   return (
@@ -58,19 +65,33 @@ export default function TodoList({ todos, refresh }) {
         {todos.map((t) => (
           <div
             key={t._id}
-            className="bg-white p-4 rounded-xl shadow flex flex-col gap-2"
+            className={`p-4 rounded-xl shadow flex flex-col gap-2 transition-all duration-300 ${
+              isDark
+                ? "bg-gray-900 text-white"
+                : "bg-white text-black"
+            }`}
           >
             {editId === t._id ? (
               <>
                 {/* Edit Mode */}
                 <input
-                  className="w-full border p-2 rounded"
+                  className={`w-full p-2 rounded border ${
+                    isDark
+                      ? "bg-gray-800 text-white border-gray-600"
+                      : "bg-white text-black border-gray-300"
+                  }`}
                   value={edit.title}
-                  onChange={(e) => setEdit({ ...edit, title: e.target.value })}
+                  onChange={(e) =>
+                    setEdit({ ...edit, title: e.target.value })
+                  }
                 />
 
                 <textarea
-                  className="w-full border p-2 rounded"
+                  className={`w-full p-2 rounded border ${
+                    isDark
+                      ? "bg-gray-800 text-white border-gray-600"
+                      : "bg-white text-black border-gray-300"
+                  }`}
                   value={edit.description}
                   onChange={(e) =>
                     setEdit({
@@ -80,7 +101,7 @@ export default function TodoList({ todos, refresh }) {
                   }
                 />
 
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex gap-2">
                   <button
                     onClick={() => update(t._id)}
                     className="bg-green-500 text-white px-4 py-2 rounded"
@@ -99,25 +120,35 @@ export default function TodoList({ todos, refresh }) {
             ) : (
               <>
                 {/* View Mode */}
-                <h3 className="text-base sm:text-lg font-semibold break-words">
-                  {t.title}
-                </h3>
+                <h3 className="font-semibold">{t.title}</h3>
 
-                <p className="text-sm text-gray-600 break-words">
+                <p
+                  className={`text-sm ${
+                    isDark ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
                   {t.description}
                 </p>
 
-                <p
-                  onClick={() => toggle(t)}
-                  className={`text-sm font-medium cursor-pointer ${statusColor(
-                    t.status,
-                  )}`}
-                >
-                  {t.status}
-                </p>
+                {/* Status */}
+                <div className="flex items-center gap-2">
+                  <span
+                    onClick={() => toggle(t)}
+                    title="Click to change status"
+                    className={`px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition hover:scale-105 ${
+                      statusBadge(t.status)
+                    }`}
+                  >
+                    {t.status}
+                  </span>
+
+                  <span className="text-xs text-gray-400">
+                    (click to change)
+                  </span>
+                </div>
 
                 {/* Actions */}
-                <div className="flex flex-wrap gap-3 mt-2">
+                <div className="flex gap-3 mt-2">
                   <button
                     onClick={() => {
                       setEditId(t._id);
@@ -141,7 +172,6 @@ export default function TodoList({ todos, refresh }) {
         ))}
       </div>
 
-      {/* Delete Modal */}
       {deleteId && (
         <DeleteModal
           onConfirm={confirmDelete}

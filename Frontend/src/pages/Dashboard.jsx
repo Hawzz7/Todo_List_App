@@ -13,7 +13,11 @@ import useDebounce from "../hooks/useDebounce";
 
 export default function Dashboard() {
   const dispatch = useDispatch();
+
   const { todos, loading } = useSelector((s) => s.todo);
+  const mode = useSelector((s) => s.theme.mode); 
+
+  const isDark = mode === "dark";
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -45,21 +49,26 @@ export default function Dashboard() {
   }, [page, debouncedSearch, status]);
 
   return (
-    <div className="min-h-screen bg-gray-100">
-
+    <div
+      className={`min-h-screen transition-all duration-300 ${
+        isDark ? "bg-black text-white" : "bg-gray-100 text-black"
+      }`}
+    >
       {/* Navbar */}
       <div className="sticky top-0 z-40">
         <Navbar />
       </div>
 
       <div className="max-w-2xl mx-auto px-3 sm:px-4 py-4">
-
         {/* Controls */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
-
           {/* Search */}
           <input
-            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+              isDark
+                ? "bg-gray-800 text-white border-gray-600 placeholder-gray-400"
+                : "bg-white text-black border-gray-300"
+            }`}
             placeholder="Search todos..."
             value={search}
             onChange={(e) => {
@@ -70,7 +79,11 @@ export default function Dashboard() {
 
           {/* Status Filter */}
           <select
-            className="w-full sm:w-auto p-3 border rounded-lg"
+            className={`w-full sm:w-auto p-3 border rounded-lg ${
+              isDark
+                ? "bg-gray-800 text-white border-gray-600"
+                : "bg-white text-black border-gray-300"
+            }`}
             value={status}
             onChange={(e) => {
               setStatus(e.target.value);
@@ -96,7 +109,11 @@ export default function Dashboard() {
         {loading ? (
           <Loader />
         ) : todos.length === 0 ? (
-          <p className="text-center text-gray-500 mt-6">
+          <p
+            className={`text-center mt-6 ${
+              isDark ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
             No todos found
           </p>
         ) : (
@@ -105,7 +122,6 @@ export default function Dashboard() {
 
         {/* Pagination */}
         <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mt-6">
-
           {/* Prev */}
           <button
             disabled={page === 1}
@@ -113,6 +129,8 @@ export default function Dashboard() {
             className={`w-full sm:w-auto px-4 py-2 rounded ${
               page === 1
                 ? "bg-gray-200 cursor-not-allowed"
+                : isDark
+                ? "bg-gray-700 hover:bg-gray-600 text-white"
                 : "bg-gray-300 hover:bg-gray-400"
             }`}
           >
@@ -120,7 +138,11 @@ export default function Dashboard() {
           </button>
 
           {/* Page Info */}
-          <span className="text-sm font-medium text-gray-700">
+          <span
+            className={`text-sm font-medium ${
+              isDark ? "text-gray-300" : "text-gray-700"
+            }`}
+          >
             Page {page} of {totalPages}
           </span>
 
@@ -131,6 +153,8 @@ export default function Dashboard() {
             className={`w-full sm:w-auto px-4 py-2 rounded ${
               page === totalPages
                 ? "bg-gray-200 cursor-not-allowed"
+                : isDark
+                ? "bg-gray-700 hover:bg-gray-600 text-white"
                 : "bg-gray-300 hover:bg-gray-400"
             }`}
           >

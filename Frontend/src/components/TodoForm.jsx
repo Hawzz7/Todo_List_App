@@ -1,9 +1,13 @@
 // src/components/TodoForm.jsx
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import api from "../api/axios";
 import toast from "react-hot-toast";
 
 export default function TodoForm({ refresh }) {
+  const mode = useSelector((s) => s.theme.mode);
+  const isDark = mode === "dark";
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -30,13 +34,14 @@ export default function TodoForm({ refresh }) {
   };
 
   return (
-    <form
-      onSubmit={submit}
-      className="space-y-3"
-    >
+    <form onSubmit={submit} className="space-y-3">
       {/* Title */}
       <input
-        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+        className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${
+          isDark
+            ? "bg-gray-800 text-white border-gray-600 placeholder-gray-400"
+            : "bg-white text-black border-gray-300"
+        }`}
         placeholder="Enter title..."
         value={form.title}
         onChange={(e) =>
@@ -46,7 +51,11 @@ export default function TodoForm({ refresh }) {
 
       {/* Description */}
       <textarea
-        className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-400"
+        className={`w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition ${
+          isDark
+            ? "bg-gray-800 text-white border-gray-600 placeholder-gray-400"
+            : "bg-white text-black border-gray-300"
+        }`}
         rows="3"
         placeholder="Enter description..."
         value={form.description}
@@ -57,7 +66,11 @@ export default function TodoForm({ refresh }) {
 
       {/* Status */}
       <select
-        className="w-full p-3 border rounded-lg"
+        className={`w-full p-3 border rounded-lg transition ${
+          isDark
+            ? "bg-gray-800 text-white border-gray-600"
+            : "bg-white text-black border-gray-300"
+        }`}
         value={form.status}
         onChange={(e) =>
           setForm({ ...form, status: e.target.value })
